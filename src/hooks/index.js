@@ -48,9 +48,8 @@ export function useCounter(defaultValue, max) {
         if (count - 1 < 0) return count;
         return (count -= 1);
       case "INPUT":
-        console.log(payload);
         if (payload >= 0 && payload <= max) {
-          count = payload;
+          count = Number(payload);
         }
         return count;
       default:
@@ -59,4 +58,44 @@ export function useCounter(defaultValue, max) {
   }
   const [count, dispatch] = useReducer(counterReducer, defaultValue);
   return [count, dispatch];
+}
+
+export function useCart(cartData) {
+  function cardReducer(cartList, { type, payload }) {
+    switch (type) {
+      case "ADD":
+        const cid = new Date().getTime();
+        payload.cid = cid;
+        return [payload, ...cartList];
+      case "DELETE":
+        //payload是商品id
+        return cartList.filter((item) => item.id !== payload);
+      case "MODIFY":
+        return cartList.map((item) => {
+          if (item.id === payload.id) {
+            item.count = payload.count;
+          }
+          return item;
+        });
+      default:
+        return cartList;
+    }
+  }
+  const [cartList, dispatch] = useReducer(cardReducer, cartData);
+  return [cartList, dispatch];
+}
+
+export function useTotalPrice(cartList) {
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    setTotal(computeTotal(cartList));
+  }, [cartList]);
+  function computeTotal(cartList) {
+    return cartList.reduce((prev, next) => {
+      const total = Number(next.price) * Number(next.count);
+      prev += total;
+      return prev;
+    }, 0);
+  }
+  return [total, setTotal];
 }
