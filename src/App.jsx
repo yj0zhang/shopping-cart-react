@@ -1,5 +1,6 @@
 import {
-    useEffect
+    createContext,
+    useMemo,
 } from 'react';
 import {
     createHashRouter,
@@ -7,31 +8,18 @@ import {
 } from 'react-router-dom';
 
 import router from '@/config/router';
-import http from '@/utils/http';
+import { useProducts } from './hooks';
 
 const routerConfig = createHashRouter(router);
 
+export const ProductContext = createContext();
+
 function App() {
-    useEffect(() => {
-        ; (async () => {
-            const products = await http('/products');
-            console.log(products)
-        })();
-        return () => {
-            //
-        }
-    }, []);
-    useEffect(() => {
-        ; (async () => {
-            const detail = await http('/detail/2');
-            console.log(detail)
-        })();
-        return () => {
-            //
-        }
-    }, []);
+    const [products] = useProducts('/products');
     return (
-        <RouterProvider router={ routerConfig } />
+        <ProductContext.Provider value={products}>
+            <RouterProvider router={routerConfig} />
+        </ProductContext.Provider>
     )
 }
 export default App;
